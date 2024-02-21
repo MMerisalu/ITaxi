@@ -1,0 +1,65 @@
+﻿@page "/vehicles/index"
+
+@using ITaxi.Service
+@using Public.App.DTO.v1.DriverArea
+
+@inject VehicleService service;
+<h1>Index</h1>
+<p>
+    <MudLink Href="/vehicle/Create">Create New</MudLink>
+</p>
+@if (Vehicles == null)
+{
+    <p>
+        <i>Loading ...</i>
+    </p>
+}
+else
+{
+    <MudSimpleTable Style="overflow-x:auto">
+    <thead>
+        <tr>
+           <MudTh Style="font-weight:bolder; color:black">Vehicle Type</MudTh>
+           <MudTh Style="font-weight:bolder; color:black">Vehicle Mark</MudTh>
+           <MudTh Style="font-weight:bolder; color:black">Vehicle Model</MudTh>
+           <MudTh Style="font-weight:bolder; color:black">Vehicle Plate Number</MudTh>
+           <MudTh Style="font-weight:bolder; color:black">Manufacture Year</MudTh>
+           <MudTh Style="font-weight:bolder; color:black">Number of Seats</MudTh>
+           <MudTh Style="font-weight:bolder; color:black">Vehicle Availability</MudTh>
+           <MudTh Style="font-weight:bolder; color:black"></MudTh>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Vehicles)
+        {
+            <tr>
+                <MudTd>@item.VehicleType</MudTd>
+                <MudTd>@item.VehicleMark?.VehicleMarkName</MudTd>
+                <MudTd>@item.VehicleModel?.VehicleModelName</MudTd>
+                <MudTd>@item.VehiclePlateNumber</MudTd>
+                <MudTd>@item.ManufactureYear</MudTd>
+                <MudTd>@item.NumberOfSeats</MudTd>
+                <MudTd>@item.VehicleAvailability</MudTd>
+                 <MudTd>
+                    <MudLink Underline="Underline.Always" Href="@($"Vehicles/Edit/{item.Id}")">Edit</MudLink>
+                    <MudLink Underline="Underline.Always" Href="@($"Vehicles/Details/{item.Id}")">Details</MudLink>
+                    <MudLink Underline="Underline.Always" Href="@($"Vehicles/Delete/{item.Id}")">Delete</MudLink>
+                    <MudLink Underline="Underline.Always" Href="@($"Vehicles/Gallery/{item.Id}")">Gallery</MudLink>
+                </MudTd>
+            </tr>
+        }
+    </tbody>
+</MudSimpleTable>
+}
+
+@code {
+    IEnumerable<Vehicle>? Vehicles = new List<Vehicle>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Don't bother calling base, it doesn't do anything anyway in razor pages :P
+        //return base.OnInitializedAsync();
+
+        Vehicles = (await service.GetAllVehiclesAsync()).ToList();
+    }
+}

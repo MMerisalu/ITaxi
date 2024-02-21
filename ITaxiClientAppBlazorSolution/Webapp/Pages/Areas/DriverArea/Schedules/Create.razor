@@ -1,0 +1,60 @@
+﻿@page "/Schedules/Create"
+
+@using ITaxi.Service
+@using Public.App.DTO.v1.DriverArea
+@using Webapp.ViewModels
+@inject VehicleService vehicleService
+@inject ScheduleService service
+@inject ISnackbar snackbar
+@inject NavigationManager nav
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="@vm" OnValidSubmit="Submit">
+            <FluentValidationValidator></FluentValidationValidator>
+            <ValidationSummary style="color:red"></ValidationSummary>
+            <MudSelect @bind-Value="@vm.Vehicle" Label="Vehicle" For="@( () => vm.Vehicle)" Placeholder="Please select a vehicle"
+                       AnchorOrigin="Origin.CenterCenter">
+                @if (vehicles != null)
+                {
+                    foreach (var option in vehicles)
+                    {
+                        <MudSelectItem Value="@option">@option?.VehicleIdentifier</MudSelectItem>
+                    }
+                }
+
+            </MudSelect>
+            <MudTextField T="DateTime?" Format="s" For="@( () => vm.StartDateAndTime)"
+                Label="Start Date and Time" @bind-Value="@vm.StartDateAndTime" InputType="InputType.DateTimeLocal" />
+            <MudTextField T="DateTime?" Format="s" For="@( () => vm.EndDateAndTime)"
+                Label="End Date and Time" @bind-Value="@vm.EndDateAndTime" InputType="InputType.DateTimeLocal" />
+          
+            <p>
+            <MudButton ButtonType="ButtonType.Submit"  Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Create</MudButton>
+            </p>
+        </EditForm>
+    </div>
+</div>
+
+
+
+@code {
+    public CreateScheduleViewModel vm = new CreateScheduleViewModel();
+    List<Vehicle?> vehicles;
+    protected override async Task OnInitializedAsync()
+    {
+        vehicles = (await vehicleService.GetAllVehiclesByDriverIdAsync()).ToList();
+    }
+
+    private async Task Submit()
+    {
+        await service.AddSchedule(new Schedule()
+            {
+                VehicleId = vm.Vehicle.Id,
+                StartDateAndTime = vm.StartDateAndTime!.Value,
+                EndDateAndTime = vm.EndDateAndTime!.Value
+            });
+        snackbar.Add("Schedule created successfully", Severity.Success);
+        nav.NavigateTo("/schedules/index");
+    }
+
+}

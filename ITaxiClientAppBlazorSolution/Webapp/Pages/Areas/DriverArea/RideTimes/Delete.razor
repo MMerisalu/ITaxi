@@ -1,0 +1,79 @@
+﻿@page "/rideTimes/Delete/{Id:guid}"
+@inject RideTimeService service
+@inject NavigationManager navManager
+@using ITaxi.Service
+@using Public.App.DTO.v1.DriverArea
+
+
+<PageTitle>RideTime Delete</PageTitle>
+<h1>Delete</h1>
+<h3>Are You Sure You Want To Delete This?</h3>
+@if (string.IsNullOrWhiteSpace(_errorMessage) == false)
+{
+    <MudAlert Severity="Severity.Error">@_errorMessage</MudAlert>
+}
+@if (rideTime == null)
+{
+    <p>
+        <i>Loading ...</i>
+    </p>
+}
+
+else
+{
+    
+    <MudSimpleTable Style="overflow-x: auto; border:none">
+        <thead>
+            <tr>
+                <MudTh Style="font-weight:bolder; color:black; border:none">Schedule</MudTh>
+                <MudTd Style="border:none">@rideTime?.Schedule?.ShiftDurationTime</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Ride Date and Time</MudTh>
+                    <MudTd Style="border:none">@rideTime!.RideDateTime.ToString("g")</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Is Taken?</MudTh>
+                    <MudTd Style="border:none"><MudCheckBox @bind-Checked="rideTime.IsTaken"></MudCheckBox></MudTd>
+                </tr>
+                
+            </thead>
+            <tbody>
+            </tbody>
+        </MudSimpleTable>
+    <MudForm>
+        <MudButton OnClick="DeleteRideTimeAsync" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
+    </MudForm>
+}
+
+
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+    RideTime? rideTime;
+    protected async override Task OnInitializedAsync()
+    {
+        rideTime = await service.GetRideTimeByIdAsync(Id);
+        
+    }
+
+    private async Task DeleteRideTimeAsync()
+    {
+         _errorMessage = null!;
+        
+
+        try
+        {
+            await service.DeleteRideTimeByIdAsync(Id);
+            navManager.NavigateTo("/rideTimes/index");
+        }
+        catch (Exception ex)
+        {
+             _errorMessage = ex.Message;
+        }
+
+    }
+
+    private string _errorMessage = String.Empty;
+}

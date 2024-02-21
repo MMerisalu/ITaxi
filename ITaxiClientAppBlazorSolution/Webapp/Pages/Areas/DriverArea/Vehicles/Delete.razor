@@ -1,0 +1,90 @@
+﻿@page "/Vehicles/Delete/{Id:guid}"
+@using ITaxi.Service
+@using Public.App.DTO.v1.DriverArea
+@inject VehicleService service
+@inject NavigationManager navManager
+@inject ISnackbar snackbar
+<PageTitle>Vehicle Delete</PageTitle>
+<h1>Delete</h1>
+
+<h3>Are You Sure You Want To Delete This?</h3>
+<div>
+    <h4>Vehicle</h4>
+    <hr />
+    @if (string.IsNullOrWhiteSpace(_errorMessage) == false)
+    {
+        <MudAlert Severity="@Severity.Error">@_errorMessage</MudAlert>
+    }
+
+    <MudSimpleTable Style="overflow-x: auto; border:none">
+        <thead>
+            <tr>
+                <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Type</MudTh>
+                <MudTd Style="border:none">@vehicle?.VehicleType?.VehicleTypeName</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Mark</MudTh>
+                    <MudTd Style="border:none">@vehicle?.VehicleMark?.VehicleMarkName</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Model</MudTh>
+                    <MudTd Style="border:none">@vehicle?.VehicleModel?.VehicleModelName</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Plate Number</MudTh>
+                    <MudTd Style="border:none">@vehicle?.VehiclePlateNumber</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Manufacture Year</MudTh>
+                    <MudTd Style="border:none">@vehicle?.ManufactureYear</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Number of Seats</MudTh>
+                    <MudTd Style="border:none">@vehicle?.NumberOfSeats</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Availability</MudTh>
+                    <MudTd Style="border:none">
+                        @vehicle?.VehicleAvailability
+                </MudTd>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </MudSimpleTable>
+
+    <MudForm>
+        <MudButton OnClick="DeleteVehicleAsync" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Error">Delete</MudButton>
+    </MudForm>
+</div>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+    Vehicle? vehicle;
+    protected async override Task OnInitializedAsync()
+    {
+        vehicle = await service.GetVehicleByIdAsync(Id);
+        await base.OnInitializedAsync();
+    }
+
+    private async Task DeleteVehicleAsync()
+    {
+        _errorMessage = null!;
+        // vehicle = await service.GetVehicleByIdAsync(Id);
+
+        try
+        {
+            await service.DeleteVehicleByIdAsync(Id);
+            snackbar.Add("Vehicle deleted successfully", Severity.Success);
+            navManager.NavigateTo("/vehicles/index");
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = ex.Message;
+        }
+
+    }
+
+    private string _errorMessage = String.Empty;
+}

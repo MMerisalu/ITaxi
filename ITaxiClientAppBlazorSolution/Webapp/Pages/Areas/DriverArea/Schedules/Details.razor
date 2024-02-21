@@ -1,0 +1,62 @@
+﻿@page "/Schedules/Details/{Id:guid}"
+@using ITaxi.Service
+@using Public.App.DTO.v1.DriverArea
+@inject ScheduleService service
+<PageTitle>Schedule Details</PageTitle>
+<h1>Details</h1>
+@if (schedule == null)
+{
+    <p>...Loading</p>
+}
+else
+{
+    <div>
+        <h4>Schedule</h4>
+        <hr />
+        <MudSimpleTable Style="overflow-x: auto; border:none">
+            <thead>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle</MudTh>
+                    <MudTd Style="border:none">@schedule?.Vehicle?.VehicleIdentifier</MudTd>
+                    </tr>
+                    <tr>
+                        <MudTh Style="font-weight:bolder; color:black; border:none">Start Date and Time</MudTh>
+                        <MudTd Style="border:none">@schedule!.StartDateAndTime.ToString("g")</MudTd>
+                    </tr>
+                    <tr>
+                        <MudTh Style="font-weight:bolder; color:black; border:none">End Date and Time</MudTh>
+                        <MudTd Style="border:none">@schedule?.EndDateAndTime.ToString("g")</MudTd>
+                    </tr>
+                    <tr>
+                        <MudTh Style="font-weight:bolder; color:black; border:none">Number of Ride Times</MudTh>
+                        <MudTd Style="border:none">@schedule?.NumberOfRideTimes</MudTd>
+                    </tr>
+                    <tr>
+                        <MudTh Style="font-weight:bolder; color:black; border:none">Number of Ride Times Taken</MudTh>
+                        <MudTd Style="border:none">@schedule?.NumberOfTakenRideTimes</MudTd>
+                    </tr>
+
+                </thead>
+                <tbody>
+                </tbody>
+            </MudSimpleTable>
+
+        </div>
+}
+
+    <MudLink Underline="Underline.Always" Href="/schedules/index">Back To List</MudLink>
+
+@code {
+
+    [Parameter]
+    public Guid Id { get; set; }
+    Schedule? schedule;
+    protected override async Task OnInitializedAsync()
+    {
+        StateHasChanged();
+        schedule = await service.GetScheduleByIdAsync(Id);
+        await base.OnInitializedAsync();
+    }
+
+}
+

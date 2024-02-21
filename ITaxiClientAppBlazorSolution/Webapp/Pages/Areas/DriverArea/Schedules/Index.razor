@@ -1,0 +1,59 @@
+﻿@page "/schedules/index"
+@using ITaxi.Service
+@using Public.App.DTO.v1.DriverArea
+@inject ScheduleService scheduleService
+<PageTitle>Index</PageTitle>
+
+
+<h1>Index</h1>
+<p>
+    <MudLink Href="/schedules/Create">Create New</MudLink>
+</p>
+@if (Schedules == null)
+{
+    <p>...Loading</p>
+}
+else
+{
+    <MudSimpleTable Style="overflow-x:auto" >
+        <thead>
+            <tr>
+                <MudTh Style="font-weight:bolder; color:black">Vehicle</MudTh>
+                <MudTh Style="font-weight:bolder; color:black">Schedule Start Date And Time</MudTh>
+                <MudTh Style="font-weight:bolder; color:black">Schedule End Date And Time</MudTh>
+                <MudTh Style="font-weight:bolder; color:black">Number of Ride Times</MudTh>
+                <MudTh Style="font-weight:bolder; color:black">Number of Ride Times Taken</MudTh>
+                
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Schedules)
+            {
+                <tr>
+                    <MudTd>@item.Vehicle?.VehicleIdentifier</MudTd>
+                    <MudTd>@item.StartDateAndTime.ToString("g")</MudTd>
+                    <MudTd>@item.EndDateAndTime.ToString("g")</MudTd>
+                    <MudTd>@item.NumberOfRideTimes</MudTd>
+                    <MudTd>@item.NumberOfTakenRideTimes</MudTd>
+                    
+                    <MudTd>
+                        <MudLink Underline="Underline.Always" Href="@($"Schedules/Details/{item.Id}")">Details</MudLink>
+                        <MudLink Underline="Underline.Always" Href="@($"Schedules/Delete/{item.Id}")">Delete</MudLink>
+                    </MudTd>
+                </tr>
+            }
+        </tbody>
+    </MudSimpleTable>
+}
+
+@code {
+    IEnumerable<Schedule>? Schedules = new List<Schedule>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Don't bother calling base, it doesn't do anything anyway in razor pages :P
+        //return base.OnInitializedAsync();
+
+        Schedules = (await scheduleService.GetAllSchedulesAsync()).ToList();
+    }
+}

@@ -1,0 +1,109 @@
+﻿@page "/ridetimes/create"
+@using ITaxi.Service
+@using Public.App.DTO.v1.DriverArea
+@using Webapp.ViewModels
+@inject RideTimeService service
+@inject ScheduleService scheduleService
+@inject NavigationManager nav
+@inject ISnackbar snackbar
+<h3>Create</h3>
+<div class="row">
+    <div class="col-md-4">
+        <EditForm Model="@vm" OnValidSubmit="Submit">
+            <FluentValidationValidator></FluentValidationValidator>
+            <ValidationSummary style="color:red"></ValidationSummary>
+            <MudSelect @bind-Value="@vm.Schedule" For="@(() => vm.Schedule)" @bind-Value:after="CheckScheduleIdValue" Label="Schedule" Placeholder="Please Select a Schedule" AnchorOrigin="Origin.CenterCenter">
+                @if (Schedules != null)
+                {
+                    foreach (var option in Schedules)
+                    {
+                        <MudSelectItem Value="@option">@option?.ShiftDurationTime</MudSelectItem>
+                    }
+                }
+
+            </MudSelect>
+            @if (vm.Schedule != null && AvailableRideTimes != null)
+            {
+                <MudSelect T="string" @bind-SelectedValues="@vm.SelectedRideTimes"  MultiSelection="true"
+                           MultiSelectionTextFunc="@(GetMultiSelectionText)"
+                           For="@(() => vm.RideTimeForValidation)"
+                           Label="Ride Times" Placeholder="Please select ride times "
+                           AnchorOrigin="Origin.CenterCenter">
+                  
+                        @foreach (var option in AvailableRideTimes)
+                        {
+                            <MudSelectItem Value="@option">@option</MudSelectItem>
+                        }
+                  
+
+                </MudSelect>
+                <MudCheckBox @bind-Value="@vm.IsTaken">Is Taken</MudCheckBox>
+            }
+             
+            <p>
+                <MudButton ButtonType="ButtonType.Submit" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Create</MudButton>
+            </p>
+        </EditForm>
+        </div>
+        </div>
+@code {
+    public CreateRideTimeViewModel vm { get; set; } = new CreateRideTimeViewModel();
+    public IEnumerable<Schedule?>? Schedules { get; set; }
+    public IEnumerable<string?>? AvailableRideTimes { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        Schedules = (await scheduleService.GetAllSchedulesAsync()).ToList();
+
+
+    }
+    protected async override Task OnParametersSetAsync()
+    {
+        await CheckScheduleIdValue();
+    }
+    private string GetMultiSelectionText(List<string> selectedValues)
+    {
+        if (selectedValues.Count == 0)
+        {
+            return $"{selectedValues.Count} ride times has been selected ";
+        }
+        if (selectedValues.Count == 1)
+        {
+            return $"{selectedValues.Count} ride time has been selected ";
+        }
+        else
+        {
+            return $"{selectedValues.Count} ride times have been selected ";
+        }
+
+
+    }
+
+    public async Task CheckScheduleIdValue()
+    {
+
+        if (vm.Schedule != null)
+        {
+
+            AvailableRideTimes = (await service.GettingRemainingRideTimesByScheduleId(vm.Schedule.Id)).ToList();
+            vm.SelectedRideTimes = new List<string>();
+
+        }
+
+    }
+    public async Task Submit()
+    {
+
+        foreach (var item in vm.SelectedRideTimes)
+        {
+            await service.AddEntity(new RideTime()
+                {
+                    ScheduleId = vm.Schedule.Id,
+                    RideDateTime = DateTime.Parse(item),
+                    IsTaken = vm.IsTaken
+                });
+        }
+        snackbar.Add("Ride time(s) created successfully", Severity.Success);
+        nav.NavigateTo("/rideTimes/index");
+    }
+}
+ 

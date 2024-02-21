@@ -1,0 +1,69 @@
+﻿@page "/Vehicles/details/{Id:guid}"
+@using BlazorWebApp.Services
+@using ITaxi.Service
+@using Public.App.DTO.v1.DriverArea
+@inject VehicleService service
+<PageTitle>Vehicle Details</PageTitle>
+<h1>Details</h1>
+@if (vehicle == null)
+{
+    <p>...Loading</p>
+}
+<div>
+    <h4>Vehicle</h4>
+    <hr />
+    <MudSimpleTable Style="overflow-x: auto; border:none">
+        <thead>
+            <tr>
+                <MudTh Style="font-weight:bolder; color:black; border:none" >Vehicle Type</MudTh>
+                <MudTd Style="border:none">@vehicle?.VehicleType?.VehicleTypeName</MudTd>
+            </tr>
+            <tr>
+                <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Mark</MudTh>
+                <MudTd Style="border:none">@vehicle?.VehicleMark?.VehicleMarkName</MudTd>
+            </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Model</MudTh>
+                    <MudTd Style="border:none">@vehicle?.VehicleModel?.VehicleModelName</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Plate Number</MudTh>
+                    <MudTd Style="border:none">@vehicle?.VehiclePlateNumber</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Manufacture Year</MudTh>
+                    <MudTd Style="border:none">@vehicle?.ManufactureYear</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Number of Seats</MudTh>
+                    <MudTd Style="border:none">@vehicle?.NumberOfSeats</MudTd>
+                </tr>
+                <tr>
+                    <MudTh Style="font-weight:bolder; color:black; border:none">Vehicle Availability</MudTh>
+                    <MudTd Style="border:none">
+                        @vehicle?.VehicleAvailability
+                    </MudTd>
+                </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </MudSimpleTable>
+
+
+</div>
+<MudLink Underline="Underline.Always" Href="/vehicles/index">Back To List</MudLink>
+
+@code {
+
+    [Parameter]
+    public Guid Id { get; set; }
+    Vehicle? vehicle;
+    protected override async Task OnInitializedAsync()
+    {
+        StateHasChanged();
+        vehicle = await service.GetVehicleByIdAsync(Id);
+        await base.OnInitializedAsync();
+    }
+
+}

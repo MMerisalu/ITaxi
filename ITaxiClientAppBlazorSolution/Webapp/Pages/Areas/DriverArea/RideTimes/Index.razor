@@ -1,0 +1,72 @@
+﻿@page "/ridetimes/index"
+@using ITaxi.Service
+@using Public.App.DTO.v1.DriverArea
+@inject RideTimeService service
+
+<PageTitle>Ride Times Index</PageTitle>
+<h1>Index</h1>
+@if (rideTimes == null)
+{
+    <p>
+        <i>Loading ...</i>
+    </p>
+}
+else
+{
+    <p>
+        <MudLink Underline="Underline.Always" Href="/ridetimes/create">Create New</MudLink>
+    </p>
+    <br />
+    <MudSimpleTable Style="overflow-x:auto">
+        <thead>
+            <tr>
+                <MudTh Style="font-weight:bolder; color:black">
+                    Schedule
+                </MudTh>
+                <MudTh Style="font-weight:bolder; color:black">
+                    Ride Time
+                </MudTh>
+                <MudTh Style="font-weight:bolder; color:black">
+                    Is Taken?
+                </MudTh>
+                <MudTh></MudTh>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in rideTimes)
+            {
+                <tr>
+                    <MudTd>@item?.Schedule?.ShiftDurationTime</MudTd>
+                    <MudTd>@item?.RideDateTime.ToString("t")</MudTd>
+                    <MudTd><MudCheckBox @bind-Checked="@item!.IsTaken"></MudCheckBox></MudTd>
+                    <MudTd>
+
+                        @if (item!.IsTaken)
+                        {
+                            <MudLink Underline="Underline.Always" Href="@($"ridetimes/Details/{item.Id}")">Details</MudLink>
+
+                            <MudLink hidden="hidden" href="#">Delete</MudLink>
+                        }
+                        else
+                        {
+                            <p>
+                                <MudLink Underline="Underline.Always" Href="@($"ridetimes/Details/{item.Id}")">Details</MudLink> |
+                            </p>
+
+                            <MudLink Underline="Underline.Always" Href="@($"ridetimes/Delete/{item.Id}")">Delete</MudLink>
+                        }
+                    </MudTd>
+                </tr>
+            }
+        </tbody>
+    </MudSimpleTable>
+}
+
+@code {
+    public List<RideTime?> rideTimes { get; set; } = new List<RideTime?>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        rideTimes = (await service.GetAllRideTimesAsync()).ToList();
+    }
+}
